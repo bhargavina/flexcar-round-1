@@ -9,7 +9,7 @@ interface MenuItemProps {
   subItems?: Array<any>;
 }
 
-export default function MenuItem(props: MenuItemProps) {
+export default function MenuItem(props: MenuItemProps): JSX.Element {
   const {name = '', description = ''} = props;
   return (
     <View style={styles.container}>

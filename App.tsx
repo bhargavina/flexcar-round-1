@@ -1,10 +1,3 @@
-/**
- * Sample React Native App
- * https://github.com/facebook/react-native
- *
- * @format
- */
-
 import React, {useMemo, useState} from 'react';
 import {
   FlatList,
@@ -22,69 +15,79 @@ import CategoryCard from './src/components/categoryCard/CategoryCard';
 function App(): JSX.Element {
   const [list] = useState(mockData.categories);
   const [searchText, setSearchText] = useState<string>('');
-  const [selectedCategories, setSelectedCategories] = useState<Array<string>>(
-    [],
-  );
-
-  const categories = useMemo(
-    () => mockData.categories.map(cat => ({name: cat.name, id: cat.id})),
-    [],
+  const [categories, setCategories] = useState<
+    Array<{name: string; id: string; selected: boolean}>
+  >(
+    mockData.categories.map(cat => ({
+      name: cat.name,
+      id: cat.id,
+      selected: true,
+    })),
   );
 
   const searchResults = useMemo(() => {
     const result: Array<ICategoryItem> = [];
     list.forEach(item => {
+      const isCategorySelected = categories.find(
+        cat => cat.id === item.id,
+      )?.selected;
       if (
         item['menu-items'].find(mu =>
           mu.name.toLowerCase().includes(searchText.toLowerCase()),
         )
       ) {
-        result.push({
-          ...item,
-          'menu-items': item['menu-items'].filter(mu =>
-            mu.name.toLowerCase().includes(searchText.toLowerCase()),
-          ),
-        });
+        if (isCategorySelected) {
+          result.push({
+            ...item,
+            'menu-items': item['menu-items'].filter(mu =>
+              mu.name.toLowerCase().includes(searchText.toLowerCase()),
+            ),
+          });
+        }
       }
     });
     return result;
-  }, [searchText, list]);
+  }, [searchText, list, categories]);
 
-  function handleSearchChange(newText: string) {
+  function handleSearchChange(newText: string): void {
     setSearchText(newText);
   }
 
   function handleCategoryItemClick(clickedId: string): void {
-    if (selectedCategories.includes(clickedId)) {
-      setSelectedCategories((prev: Array<string>) =>
-        prev.filter((cat: string) => cat !== clickedId),
-      );
-    } else {
-      setSelectedCategories((prev: Array<string>) => [...prev, clickedId]);
-    }
+    setCategories(prev =>
+      prev.map(cat =>
+        cat.id === clickedId ? {...cat, selected: !cat.selected} : cat,
+      ),
+    );
   }
 
   return (
-    <SafeAreaView>
-      <TextInput
-        value={searchText}
-        onChangeText={handleSearchChange}
-        style={styles.searchInput}
-        placeholder="Search..."
-      />
-      <ScrollView contentContainerStyle={styles.filterContainer} horizontal>
-        {categories.map(cat => (
+    <SafeAreaView style={styles.app}>
+      <View style={styles.searchContainer}>
+        <TextInput
+          value={searchText}
+          onChangeText={handleSearchChange}
+          style={styles.searchInput}
+          placeholder="Search..."
+        />
+      </View>
+      <ScrollView
+        contentContainerStyle={styles.filterContainer}
+        horizontal
+        showsHorizontalScrollIndicator={false}>
+        {categories.map((cat, index: number) => (
           <TouchableOpacity
             key={cat.id}
-            style={styles.categoryItem}
-            onPress={() => handleCategoryItemClick(cat.id)}>
-            <View
-              style={
-                selectedCategories.includes(cat.id)
-                  ? styles.selected
-                  : styles.unselected
-              }
-            />
+            onPress={() => handleCategoryItemClick(cat.id)}
+            style={[
+              index === 0 ? styles.firstCategoryItem : {},
+              index === categories.length - 1 ? styles.lastCategoryItem : {},
+              index !== 0 && index !== categories.length - 1
+                ? styles.midCategoryItems
+                : {},
+              styles.categoryItem,
+            ]}>
+            <View style={cat.selected ? styles.selected : styles.unselected} />
             <Text>{cat.name}</Text>
           </TouchableOpacity>
         ))}
@@ -102,25 +105,37 @@ function App(): JSX.Element {
 
 const styles = StyleSheet.create({
   app: {
-    alignItems: 'center',
+    paddingBottom: 118,
+    backgroundColor: '#FFF',
   },
-  searchInput: {
-    color: 'black',
-    fontSize: 16,
-    alignSelf: 'flex-start',
+  searchContainer: {
     margin: 16,
     borderWidth: 1,
     borderColor: 'black',
   },
+  searchInput: {
+    color: 'black',
+    fontSize: 16,
+  },
+  filterContainer: {
+    marginHorizontal: 16,
+    height: 40,
+    marginBottom: 16,
+  },
+  firstCategoryItem: {
+    marginStart: 0,
+    marginEnd: 8,
+  },
+  midCategoryItems: {
+    marginHorizontal: 8,
+  },
+  lastCategoryItem: {
+    marginStart: 8,
+    marginEnd: 0,
+  },
   categoryItem: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginHorizontal: 8,
-  },
-  filterContainer: {
-    alignSelf: 'flex-start',
-    marginHorizontal: 16,
-    marginBottom: 16,
   },
   selected: {
     height: 16,

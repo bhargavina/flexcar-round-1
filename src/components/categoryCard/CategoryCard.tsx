@@ -9,7 +9,7 @@ interface CategoryCardProps {
   menuItems: Array<IMenuItem>;
 }
 
-export default function CategoryCard(props: CategoryCardProps) {
+export default function CategoryCard(props: CategoryCardProps): JSX.Element {
   const {name = '', menuItems = []} = props;
 
   return (

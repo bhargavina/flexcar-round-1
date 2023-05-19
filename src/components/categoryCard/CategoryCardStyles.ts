@@ -5,7 +5,7 @@ export const styles = StyleSheet.create({
     paddingBottom: 8,
     borderWidth: 1,
     borderColor: '#A8A8A8',
-    backgroundColor: '#F8A4',
+    // backgroundColor: '#F8A4',
   },
   categoryName: {
     fontSize: 20,
